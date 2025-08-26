@@ -3,3 +3,4 @@
 
 This is the official implementation of the paper "Boosting 3D Liver Shape Datasets with Diffusion Models and Implicit Neural Representations" (MICCAI 2025).
 
+![](src/teaser_figure.png)
