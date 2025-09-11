@@ -1,6 +1,21 @@
 # hyperdiffusion_liver
-[Paper (Arxiv)](https://arxiv.org/abs/2504.19402) | MICCAI 2025
+[Paper (Arxiv)](https://arxiv.org/abs/2504.19402) | [MICCAI 2025 (Paper Information and Reviews)](https://papers.miccai.org/miccai-2025/0105-Paper2124.html)
 
 This is the official implementation of the paper "Boosting 3D Liver Shape Datasets with Diffusion Models and Implicit Neural Representations" (MICCAI 2025).
 
 ![](src/teaser_figure.png)
+
+
+## Citation
+```bibtex
+@InProceedings{NguKho_Boosting_MICCAI2025,
+    author = { Nguyen, Khoa Tuan and Tozzi, Francesca and Willaert, Wouter and Vankerschaver, Joris and Rashidian, Niki and De Neve, Wesley},
+    title = { { Boosting 3D Liver Shape Datasets with Diffusion Models and Implicit Neural Representations } },
+    booktitle = {proceedings of Medical Image Computing and Computer Assisted Intervention -- MICCAI 2025},
+    year = {2025},
+    publisher = {Springer Nature Switzerland},
+    volume = {LNCS 15961},
+    month = {September},
+    page = {67 -- 77}
+}
+```
