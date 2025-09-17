@@ -3,7 +3,21 @@
 
 This is the official implementation of the paper "Boosting 3D Liver Shape Datasets with Diffusion Models and Implicit Neural Representations" (MICCAI 2025).
 
+Our following up works:
+- [Toward Using Machine Learning as a Shape Quality Metric for Liver Point Cloud Generation](https://arxiv.org/abs/2508.02482)
+
+
+
+
+## Workflow of the proposed method
+
 ![](src/teaser_figure.png)
+
+
+
+
+
+
 
 
 ## Citation
