@@ -1,6 +1,8 @@
 # hyperdiffusion_liver
 [Paper (Arxiv)](https://arxiv.org/abs/2504.19402) | [MICCAI 2025 (Paper Information and Reviews)](https://papers.miccai.org/miccai-2025/0105-Paper2124.html)
 
+> **Note**: We will try to release the code and data by the end of 2025.
+
 This is the official implementation of the paper "Boosting 3D Liver Shape Datasets with Diffusion Models and Implicit Neural Representations" (MICCAI 2025).
 
 Our following up works:
@@ -15,8 +17,11 @@ Our following up works:
 
 
 
-
-
+## Acknowledgments
+We thank the authors of the following works for their open-source implementation:
+- [HyperDiffusion](https://github.com/Rgtemze/HyperDiffusion)
+- [SIREN](https://github.com/vsitzmann/siren)
+- [Shape As Points (SAP)](https://github.com/autonomousvision/shape_as_points)
 
 
 
