@@ -10,12 +10,14 @@ Our following up works:
 
 
 
-
 ## Workflow of the proposed method
 
 ![](src/teaser_figure.png)
 
 
+## Generated liver objects throughout the training process
+
+![](src/HyperDiffusion_fast.gif)
 
 ## Acknowledgments
 We thank the authors of the following works for their open-source implementation:
