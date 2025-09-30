@@ -1,5 +1,5 @@
 # hyperdiffusion_liver
-[Paper (Arxiv)](https://arxiv.org/abs/2504.19402) | [MICCAI 2025 (Paper Information and Reviews)](https://papers.miccai.org/miccai-2025/0105-Paper2124.html) | [Poster](src/Khoa_HyperDiffusionLiver_poster.pdf)
+[MICCAI 2025 (Paper Information and Reviews)](https://papers.miccai.org/miccai-2025/0105-Paper2124.html) | [Poster](src/Khoa_HyperDiffusionLiver_poster.pdf) | [Paper (Arxiv)](https://arxiv.org/abs/2504.19402) |
 
 > **Note**: We will try to release the code and data by the end of 2025.
 
