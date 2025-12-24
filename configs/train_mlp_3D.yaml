@@ -1,0 +1,120 @@
+### Train MLP config file
+defaults:
+  - utils@_here_: common_cfg ### instead of calling `cfg.utils.some_key`, we map it into `cfg.some_key`
+  - override hydra/output: train ### {debug; train; infer; trash} ### Have to place before _self_
+  - _self_
+
+
+### =================== For_logging =================== ###
+### Name of the process on Nvida-smi
+process_name: mlp_3D
+
+### Suffix of the folder in the `experiments / <folder_name> / <hydra/output> / <date> / <time>_<folder_name>` directory
+folder_name: ${process_name}
+### ------------------- End For_logging ------------------- ###
+
+
+### =================== Data Path =================== ###
+### Train on either a directory or a single file
+### Override from the CLI if you want a different file/folder
+### Example override: `python train_mlp_3D.py data_path=/data/ok/sampled_20000/npy/3D_Reconstruction`
+data_path: ${hydra:runtime.cwd}/data/Totalsegmentator_dataset_v201_Liver/ok/sampled_20000/npy/3D_Reconstruction
+### ------------------- End Data Path ------------------- ###
+
+seed: 42
+
+mini_batch_size: 2048 ### Number of selected points among all sampled point clouds. A bag contains a mini-batch points.
+batch_size: 10000 ### Number of bags within an epoch.
+epochs: 1000 ### Reduce for quick debugging.
+lr: 1e-2
+
+
+### =================== For Inference in an interval =================== ###
+infer_flag: true            ### Highest flag {true; false}. Whether to infer the model in an interval.
+infer_freq: 250             ### Frequency/Interval of inference.
+save_infer_ckpt_flag: false ### Whether to save the checkpoint of the inferred model. Note: We still automatically save the model at the end of the training despite this flag.
+export_flag: false          ### Whether to export the mesh.
+plot_mesh_views_flag: false ### Whether to plot the mesh views
+
+### ------------------- End For Inference in an interval ------------------- ###
+
+
+### Mesh creator for exporting mesh
+### Some colors
+### [255,  76,  76, 255]: Red in HyperDiffusion
+### [128, 174, 128, 255]: Green in 3DSlicer app
+MeshCreator:
+  init:
+    _target_: utils.mesh_utils.MeshCreator
+    N: 256  ### Number of points along each axis for discretizing the cube volume
+    linspace_min: -0.5 ### Min value of the cube volume
+    linspace_max: 0.5  ### Max value of the cube volume
+    voxel_origin: [-0.5, -0.5, -0.5] ### Origin of the voxel grid for marching cubes.
+    batch_size: 1024 ### Batch size for inference
+    mesh_format: ply
+    vertex_color: [128, 174, 128, 255] ### Color of the vertices
+    method: skimage ### {skimage; ocd}
+
+  export:
+    level: 0.0 ### Contour value
+    return_occupancy: false ### Whether to return the occupancy values
+    imp_func_cplx: 512 ### Complexity of the implicit function for method == 'ocd'
+
+
+MeshEvaluator:
+  init:
+    _target_: utils.mesh_utils.MeshEvaluator
+    N_pointcloud: 100_000
+    N_cube: 128
+    min_max_range: [-0.5, 0.5]
+    winding_number_threshold: 0.5
+    hash_resolution: 512
+    verbose: false
+    random_seed: 42
+
+
+dataset:
+  PointCloud:
+    _target_: utils.dataset_loader.PointCloud
+    mini_batch_size: ${mini_batch_size}
+    getItem_mode: random ### {random; sequential; all}
+
+
+data_loader:
+  _target_: torch.utils.data.DataLoader
+  batch_size: ${batch_size}
+  shuffle: true
+  pin_memory: false
+  num_workers: 0
+
+
+### MLP model (INR)
+model:
+  selected: MLP3D
+  MLP3D:
+    _target_: models.mlp.MLP3D
+    input_size: 3
+    output_size: 1
+    hidden_neurons: [128, 128, 128]
+    use_leaky_relu: false
+    use_bias: true
+    include_input: true
+    multires: 4
+    log_sampling: true
+
+
+optimizer:
+  selected: RAdam
+  AdamW:
+    _target_: torch.optim.AdamW
+    lr: ${lr}
+  RAdam:
+    _target_: torch.optim.RAdam
+    lr: ${lr}
+
+
+loss_fn:
+  selected: BCEWithLogitsLoss
+  BCEWithLogitsLoss:
+    _target_: torch.nn.BCEWithLogitsLoss
+

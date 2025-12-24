@@ -1,0 +1,14 @@
+**.stl
+**.obj
+**.ply
+**.npy
+**.pt
+**.pth
+**.pyc
+
+
+**.DS_Store
+
+.gradio/*
+experiments/*
+data/*

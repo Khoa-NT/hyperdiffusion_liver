@@ -1,0 +1,243 @@
+### Train diffusion (HyperDiffusion-style) config file
+defaults:
+  - utils@_here_: common_cfg ### instead of calling `cfg.utils.some_key`, we map it into `cfg.some_key`
+  - override hydra/output: train ### {debug; train; infer; trash} ### Have to place before _self_
+  - _self_
+
+### =================== Data Path =================== ###
+# Path to the liver objects directory
+data_object_root: ${hydra:runtime.cwd}/data/Totalsegmentator_dataset_v201_Liver
+
+# Path to the mesh of the liver objects
+mesh_path: ${data_object_root}/ok/sampled_20000/mesh
+
+### Split path for training, validation, and test
+split_path:
+  train: ${data_object_root}/ok/train.txt
+  val: ${data_object_root}/ok/val.txt
+  test: ${data_object_root}/ok/test.txt
+
+
+# Path to the INR checkpoint for training HyperDiffusion
+data_path: ${hydra:runtime.cwd}/data/ckpt/inr_ckpt/OK_SAMPLED_20000
+
+### ------------------- End Data Path ------------------- ###
+
+### =================== Checkpoint Path =================== ###
+### Path to the checkpoint for retraining; keep empty to start fresh
+load_ckpt_path: ""
+
+### Start epoch
+start_epoch: null ### Set null to start from 1
+
+### ------------------- End Checkpoint Path ------------------- ###
+
+
+seed: 42
+
+batch_size: 32 ### For training
+epochs: 12000 ### 6000 from HyperDiffusion
+timesteps: 1000 ### Diffusion steps
+
+lr: 1e-5 ### 1e-5 default ### for lucidrains
+
+running_mode: train ### {train; test}
+
+
+### =================== For TB, logging, metrics, and exporting =================== ###
+### Name of the process on Nvida-smi. Just for naming the folder.
+process_name: ${diffusion_method.selected}
+
+### Suffix of the folder in the `experiments / <folder_name> / <hydra/output> / <date> / <time>_<folder_name>` directory
+folder_name: ${process_name}
+
+### Note for you to know what you are doing
+note: Note for training HyperDiffusion on the liver objects
+
+### Extra folders. For example, to get the path to `ckpt` we use `cfg.ckpt_path`
+### Check common_cfg.yaml for more details
+extra_folders: [ckpt, export_mesh, generated_renders, metrics]
+
+n_render_views: 2 ### Number of views to render
+val_test_sample_batch_size: 100 ### Batch size of diffusion samples for validation / test
+
+training_epoch_end:
+  interval: 1000 ### 50 for our experiment ### 10 in HyperDiffusion
+  num_samples: 4
+  export_mesh: true ### {true; false} Whether to export the mesh in training_epoch_end()
+
+val_step:
+  interval: 5000 ### 200 for HyperDiffusion
+  max_samples: 4 ### Number of samples to run. Set low value to increase speed.
+
+test_step:
+  max_samples: null ### Set null to run all samples.
+  run_test: false ### {true; false} Whether to run the test step.
+
+calc_metrics:
+  sample_mult: 1.1 ### Number of diffusion samples to generate.
+  n_sample_points: 2048 ### Number of points to sample from the generated mesh (from generated INRs).
+  compute_all_metrics_batch_size: 32 ### Batch size for computing all metrics from HyperDiffusion paper.
+  calculate_fid_3d_batch_size: 32 ### Batch size for calculating FID from HyperDiffusion paper.
+
+### ------------------- End For TB, logging, metrics, and exporting ------------------- ###
+
+
+### Diffusion method (e.g., from HyperDiffusion paper or using diffusers)
+diffusion_method:
+  selected: hpdf ### {hpdf; lucidrains}
+
+  hpdf: ### from HyperDiffusion paper
+    trainer:
+      _target_: utils.diffusion_trainer.HyperDiffusionTrainer
+    transformer:
+      n_embd: 2880
+      n_layer: 12
+      n_head: 16    ### 2880 / 16 = 180 embedding per head
+      split_policy: layer_by_layer ### each layer's parameters are contained in a SINGLE token, no mixing across layers or inputs
+      use_global_residual: false
+      condition: 'no'
+    diff_config:
+      timesteps: ${timesteps}
+      model_mean_type: START_X
+      model_var_type: FIXED_LARGE
+      loss_type: MSE
+      normalization_factor: 1
+
+  lucidrains: ### from lucidrains
+    trainer:
+      _target_: utils.diffusion_trainer.lucidrainsTrainer
+
+    model:
+      n_embd: 4096 ### 2048 default
+      mlp_proj_encoder_depth: 1
+      mlp_proj_decoder_depth: 1
+      length_size: 32 ### {256; null} Set null to use the default length_size
+      unet_dim: 512 ### 256 default
+      unet_dim_mults: [1, 2, 4, 8, 8]
+
+    diff_config:
+      auto_normalize: false ### {true; false}
+      objective: pred_x0 ### {'pred_noise', 'pred_x0', 'pred_v'}
+
+    accelerator:
+      split_batches: true
+      amp: true ### {true; false}
+      mixed_precision: 'fp16'
+
+
+### MLP model (INR)
+mlp_model:
+  selected: MLP3D
+  MLP3D:
+    _target_: models.mlp.MLP3D
+    input_size: 3
+    output_size: 1
+    hidden_neurons: [128, 128, 128]
+    use_leaky_relu: false
+    use_bias: true
+    include_input: true
+    multires: 4
+    log_sampling: true
+
+
+### Optimizer
+optimizer:
+  selected: AdamW
+  AdamW:
+    _target_: torch.optim.AdamW
+    lr: ${lr}
+  RAdam:
+    _target_: torch.optim.RAdam
+    lr: ${lr}
+
+
+### Clip gradient norm
+clip_grad_norm:
+  use: true ### {true; false}
+  max_norm: 1.0
+  norm_type: 2
+
+
+### Scheduler
+scheduler:
+  selected: get_cosine_schedule_with_warmup ### {StepLR; get_cosine_schedule_with_warmup}
+  StepLR:
+    _target_: torch.optim.lr_scheduler.StepLR
+    step_size: 200 ### 200 for HyperDiffusion
+    gamma: 0.9
+
+  get_cosine_schedule_with_warmup: ### diffusers.optimization.get_cosine_schedule_with_warmup
+    percentage_warmup: 0.01 ### Percentage of the total training steps to warm up the learning rate
+
+
+### PyTorch Dataset
+dataset:
+  selected: WeightDataset
+  WeightDataset:
+    _target_: utils.dataset_loader.WeightDataset
+    data_path: ${data_path}
+    mesh_path: ${mesh_path}
+
+
+### PyTorch DataLoader
+### We can modify the DataLoader in the code but we keep it here for convenience
+data_loader:
+  train:
+    _target_: torch.utils.data.DataLoader
+    batch_size: ${batch_size}
+    shuffle: true
+    pin_memory: true
+    num_workers: 8
+
+  test:
+    _target_: torch.utils.data.DataLoader
+    batch_size: ${val_test_sample_batch_size}
+    shuffle: false
+    pin_memory: true
+    num_workers: 8
+
+
+### Mesh creator for exporting mesh
+### Some colors
+### [255,  76,  76, 255] or [1, 0.3, 0.3, 1.0]: Red in HyperDiffusion
+### [128, 174, 128, 255] or [0.5019608 , 0.68235296, 0.5019608 , 1]: Green in 3DSlicer app
+### [30, 100, 200, 255] or [0.11764706, 0.39215686, 0.78431373, 1.0]: Blue in Ghent
+### [255, 210, 0, 255] or [1, 0.82352941, 0, 1]: Yellow in Ghent
+MeshCreator:
+  init:
+    _target_: utils.mesh_utils.MeshCreator
+    N: 256  ### Number of points along each axis for discretizing the cube volume
+    linspace_min: -0.5 ### Min value of the cube volume
+    linspace_max: 0.5  ### Max value of the cube volume
+    voxel_origin: [-0.5, -0.5, -0.5] ### Origin of the voxel grid for marching cubes.
+    batch_size: 1024 ### Batch size for inference
+    mesh_format: ply
+    vertex_color: [255,  76,  76, 255] ### Color of the vertices
+    method: skimage ### {skimage; ocd}
+
+  export:
+    level: 0.0 ### Contour value
+    return_occupancy: true ### Whether to return the occupancy values
+    imp_func_cplx: 512 ### Complexity of the implicit function for method == 'ocd'
+
+
+### Liver renderer using pyrender
+LiverRender:
+  n_cameras: ${n_render_views} ### Number of cameras to render
+  camera_poses: ### List of dicts. Each dict contains the camera pose parameters.
+    - elev: 10
+      azim: 70
+      roll: 0
+      distance: 1
+      target: [0, 0, 0]
+      up: [0, 0, 1]
+    - elev: 50
+      azim: -150
+      roll: 0
+      distance: 1
+      target: [0, 0, 0]
+      up: [0, 0, 1]
+
+  view_size: [800, 800] ### Size of the rendered image
+

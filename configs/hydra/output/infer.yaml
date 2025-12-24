@@ -1,0 +1,16 @@
+# @package hydra
+
+# This file is overwrite the setting of the file in
+# https://github.com/facebookresearch/hydra/blob/master/hydra/conf/hydra/output/default.yaml
+#
+### Set the output logger to selected directory. Create if doesn't exist.
+
+run:
+  dir: experiments/${folder_name}/infer/${now:%Y_%m_%d}/${now:%H_%M_%S}_${folder_name}
+
+
+### More information about custom: https://hydra.cc/docs/configure_hydra/workdir/
+sweep:
+  dir: experiments/${folder_name}/infer/${now:%Y_%m_%d}/${now:%H_%M_%S}_multirun_${folder_name}
+  subdir: ${hydra.job.override_dirname}
+#  subdir: ${hydra.job.num}

@@ -1,0 +1,25 @@
+# ------------------------------------
+# Common Configuration
+# ------------------------------------
+### Set Working directory to the current run-time folder
+### Ref: https://hydra.cc/docs/tutorials/basic/running_your_app/working_directory/#disable-changing-current-working-dir-to-jobs-output-dir
+hydra:
+  job:
+    chdir: true
+
+
+# --------------------------------------------------------------------------------
+# Pre-defined key here
+# Assign later in hydra_utils.preprocess_cfg() function
+# --------------------------------------------------------------------------------
+terminal_path: null   # The path where we operate the code from terminal
+current_path: null    # Relative path/the path of the folder where the code is running
+
+
+### Extra folders to create
+### If null, no extra folders will be created
+### E.g., create "ckpt", "logs", "meshes", etc. then define in the main yaml file
+### extra_folders = ["ckpt", "logs", "meshes"]
+extra_folders: null
+
+
