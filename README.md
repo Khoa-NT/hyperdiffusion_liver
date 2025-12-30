@@ -6,6 +6,7 @@
 <a href="src/Khoa_HyperDiffusionLiver_poster.pdf"><img src='https://img.shields.io/badge/Poster-pdf-green' alt='Poster'></a>
 <a href="https://drive.google.com/file/d/1xE3m-0toASbgJh7V-GmIb0wxfxJK2xs2/view?usp=sharing"><img src='https://img.shields.io/badge/Dataset-Google_Drive-blue' alt='Data & ckpt'></a>
 <a href="https://drive.google.com/file/d/1Qhvner5PICko2CM8n8DL1TedID290WpQ/view?usp=sharing"><img src='https://img.shields.io/badge/Checkpoints-Google_Drive-blue' alt='Checkpoints'></a>
+<a href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img src='https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg' alt='License'></a>
 
 <!-- <a href="https://arxiv.org/abs/2504.19402"><img src='https://img.shields.io/badge/arXiv-Paper-red?logo=arxiv&logoColor=white' alt='arXiv'></a> -->
 
@@ -253,6 +254,13 @@ python train_hd_3D.py \
 Results are saved to `experiments/hd_3D/train/yyyy_mm_dd/hh_mm_ss_hd_3D`.
 
 
+## Export segmentation from 3D Slicer
+
+We provide a script to export the segmentation from 3D Slicer automatically for selected organs in TotalSegmentator.
+Please check out the repository [slicer_liver_export](https://github.com/Khoa-NT/slicer_liver_export) for more details.
+
+
+
 ## Acknowledgments
 We thank the authors of the following works for their open-source implementation:
 - [HyperDiffusion](https://github.com/Rgtemze/HyperDiffusion)
@@ -276,3 +284,14 @@ If you find our work useful in your research, please cite our paper:
     page = {67 -- 77}
 }
 ```
+
+
+# License
+This work is licensed under a
+[Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License][cc-by-nc-sa].
+
+[![CC BY-NC-SA 4.0][cc-by-nc-sa-image]][cc-by-nc-sa]
+
+[cc-by-nc-sa]: http://creativecommons.org/licenses/by-nc-sa/4.0/
+[cc-by-nc-sa-image]: https://licensebuttons.net/l/by-nc-sa/4.0/88x31.png
+[cc-by-nc-sa-shield]: https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg
