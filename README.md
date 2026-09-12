@@ -109,7 +109,7 @@ Totalsegmentator_dataset_v201_Liver
 
 ### 4. Download the HyperDiffusion and INR checkpoints (required for the demo)
 
-You can download the HyperDiffusion and INR checkpoints from [here](https://drive.google.com/file/d/1qyettXZeU-f-3zZfrBCqetpzAz489bkH/view?usp=sharing) (about 9 GB after unzipping).
+You can download the HyperDiffusion and INR checkpoints from [here](https://drive.google.com/file/d/1Qhvner5PICko2CM8n8DL1TedID290WpQ/view?usp=sharing) (about 9 GB after unzipping).
 Unzip the file and place it in the subfolder `data/ckpt` of the repository directory as follows:
 
 ```bash
